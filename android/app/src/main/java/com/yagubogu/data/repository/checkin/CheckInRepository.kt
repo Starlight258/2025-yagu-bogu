@@ -3,7 +3,7 @@ package com.yagubogu.data.repository.checkin
 import com.yagubogu.data.dto.response.checkin.CheckInGameDto
 import com.yagubogu.data.dto.response.checkin.FanRateByGameDto
 import com.yagubogu.data.dto.response.checkin.StadiumCheckInCountDto
-import java.time.LocalDate
+import kotlinx.datetime.LocalDate
 
 interface CheckInRepository {
     suspend fun addCheckIn(gameId: Long): Result<Unit>
@@ -14,6 +14,7 @@ interface CheckInRepository {
 
     suspend fun getCheckInHistories(
         year: Int,
+        month: Int,
         filter: String,
         sort: String,
     ): Result<List<CheckInGameDto>>
@@ -21,4 +22,6 @@ interface CheckInRepository {
     suspend fun getCheckInStatus(date: LocalDate): Result<Boolean>
 
     suspend fun getStadiumCheckInCounts(year: Int): Result<List<StadiumCheckInCountDto>>
+
+    suspend fun addPastCheckIn(gameId: Long): Result<Unit>
 }

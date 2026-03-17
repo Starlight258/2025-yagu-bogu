@@ -27,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yagubogu.R
-import com.yagubogu.presentation.util.DateFormatter
 import com.yagubogu.ui.badge.model.BADGE_ID_0_NOT_ACQUIRED_FIXTURE
 import com.yagubogu.ui.badge.model.BadgeInfoUiModel
 import com.yagubogu.ui.theme.Gray300
@@ -40,6 +39,8 @@ import com.yagubogu.ui.theme.PretendardRegular12
 import com.yagubogu.ui.theme.Primary500
 import com.yagubogu.ui.theme.Primary700
 import com.yagubogu.ui.theme.White
+import com.yagubogu.ui.util.yyyyMMddFormatter
+import kotlinx.datetime.format
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,7 +145,7 @@ private fun AcquiredBadgeContent(
         text =
             stringResource(
                 R.string.badge_achieved_date,
-                badgeInfo.achievedAt?.format(DateFormatter.yyyyMMdd) ?: "",
+                badgeInfo.achievedAt?.format(yyyyMMddFormatter) ?: "",
             ),
         style = PretendardRegular12,
         color = Gray500,

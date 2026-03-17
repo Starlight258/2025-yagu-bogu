@@ -25,7 +25,7 @@ public class ProfileImageService {
 
     private static final long MAX_FILE_SIZE_MB = 5;
     private static final long MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
-    private static final String IMAGES_PROFILES_PREFIX = "yagubogu/images/profiles/";
+    private static final String IMAGES_PROFILES_PREFIX = "images/profiles/";
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/jpeg");
 
     private final S3Presigner s3Presigner;
@@ -56,14 +56,11 @@ public class ProfileImageService {
 
     public PreSignedUrlCompleteResponse completeUpload(
             final Long memberId,
-            final PreSignedUrlCompleteRequest request
-    ) {
+            final PreSignedUrlCompleteRequest request) {
         String key = request.key();
         assertObjectExists(key);
 
-        String objectUrl = s3Client.utilities()
-                .getUrl(b -> b.bucket(s3Properties.bucket()).key(key))
-                .toExternalForm();
+        String objectUrl = s3Properties.endpoint() + "/" + s3Properties.bucket() + "/" + key;
 
         return updateProfileImage(memberId, objectUrl);
     }
@@ -88,16 +85,14 @@ public class ProfileImageService {
     private void validateContentLength(final PreSignedUrlStartRequest preSignedUrlStartRequest) {
         if (preSignedUrlStartRequest.contentLength() > MAX_FILE_SIZE) {
             throw new PayloadTooLargeException(
-                    "Content length is too large: " + preSignedUrlStartRequest.contentLength()
-            );
+                    "Content length is too large: " + preSignedUrlStartRequest.contentLength());
         }
     }
 
     private void validateContentType(final String contentType) {
         if (!ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new UnsupportedMediaTypeException(
-                    "Content type is invalid: " + contentType
-            );
+                    "Content type is invalid: " + contentType);
         }
     }
 }

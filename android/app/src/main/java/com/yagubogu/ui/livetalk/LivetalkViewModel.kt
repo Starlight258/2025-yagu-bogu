@@ -3,29 +3,29 @@ package com.yagubogu.ui.livetalk
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yagubogu.data.repository.game.GameRepository
-import com.yagubogu.presentation.mapper.toUiModel
-import com.yagubogu.presentation.util.mapList
 import com.yagubogu.ui.livetalk.model.LivetalkStadiumItem
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.yagubogu.ui.mapper.toLivetalkUiModel
+import com.yagubogu.ui.util.mapList
+import com.yagubogu.ui.util.now
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import timber.log.Timber
-import java.time.LocalDate
-import javax.inject.Inject
+import kotlin.time.Clock
 
-@HiltViewModel
-class LivetalkViewModel @Inject constructor(
+class LivetalkViewModel(
     private val gameRepository: GameRepository,
+    private val clock: Clock,
 ) : ViewModel() {
     private val _stadiumItems = MutableStateFlow<List<LivetalkStadiumItem>>(emptyList())
     val stadiumItems: StateFlow<List<LivetalkStadiumItem>> = _stadiumItems.asStateFlow()
 
-    fun fetchGames(date: LocalDate = LocalDate.now()) {
+    fun fetchGames(date: LocalDate = LocalDate.now(clock)) {
         viewModelScope.launch {
             val gamesResult: Result<List<LivetalkStadiumItem>> =
-                gameRepository.getGames(date).mapList { it.toUiModel() }
+                gameRepository.getGames(date).mapList { it.toLivetalkUiModel() }
             gamesResult
                 .onSuccess { livetalkStadiumItems: List<LivetalkStadiumItem> ->
                     _stadiumItems.value = sortStadiumsByVerification(livetalkStadiumItems)

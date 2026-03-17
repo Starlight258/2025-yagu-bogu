@@ -5,6 +5,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,13 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
-import com.yagubogu.presentation.util.DateFormatter
 import com.yagubogu.ui.attendance.model.AttendanceHistoryItem
 import com.yagubogu.ui.theme.EsamanruBold
 import com.yagubogu.ui.theme.Gray500
@@ -35,13 +34,15 @@ import com.yagubogu.ui.theme.PretendardSemiBold20
 import com.yagubogu.ui.theme.White
 import com.yagubogu.ui.theme.dpToSp
 import com.yagubogu.ui.util.noRippleClickable
+import com.yagubogu.ui.util.yyyyMMddFormatter
+import kotlinx.datetime.format
 
 @Composable
 fun AttendanceItem(
     item: AttendanceHistoryItem,
     isExpanded: Boolean,
-    onItemClick: (AttendanceHistoryItem) -> Unit,
     modifier: Modifier = Modifier,
+    onItemClick: (AttendanceHistoryItem) -> Unit = {},
 ) {
     Column(
         modifier =
@@ -75,23 +76,21 @@ private fun AttendanceHistorySummary(
     item: AttendanceHistoryItem.Summary,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = item.awayTeam.score,
             style = EsamanruBold.copy(fontSize = 56.dpToSp),
             color = item.awayTeamColor,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Start,
+            modifier = Modifier.align(Alignment.CenterStart),
         )
 
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
@@ -114,7 +113,7 @@ private fun AttendanceHistorySummary(
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = item.attendanceDate.format(DateFormatter.yyyyMMdd),
+                text = item.attendanceDate.format(yyyyMMddFormatter),
                 style = PretendardRegular12.copy(color = Gray500),
             )
             Text(
@@ -127,8 +126,7 @@ private fun AttendanceHistorySummary(
             text = item.homeTeam.score,
             style = EsamanruBold.copy(fontSize = 56.dpToSp),
             color = item.homeTeamColor,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.End,
+            modifier = Modifier.align(Alignment.CenterEnd),
         )
     }
 }
@@ -187,7 +185,6 @@ private fun AttendanceItemPlayedPreview() {
     AttendanceItem(
         item = ATTENDANCE_HISTORY_ITEM_PLAYED,
         isExpanded = true,
-        onItemClick = {},
     )
 }
 
@@ -197,6 +194,5 @@ private fun AttendanceItemCanceledPreview() {
     AttendanceItem(
         item = ATTENDANCE_HISTORY_ITEM_CANCELED,
         isExpanded = false,
-        onItemClick = {},
     )
 }

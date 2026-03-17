@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "dev" ]
     paths:
-      - "backend/**"
+      - "backend/app/**"
   workflow_dispatch:
 
 env:
@@ -33,7 +33,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run Tests
-        run: ./gradlew :app:test
+        run: ./gradlew :app:test --no-daemon
 
   build:
     needs: ci
@@ -59,11 +59,11 @@ jobs:
       - name: Docker Image Build & Push (arm64-arch)
         run: |
           TAG_LATEST="dev-latest"
-          # Dockerfile 경로: backend/Dockerfile
+          # 빌드 컨텍스트: backend/ (Gradle 루트), Dockerfile: app/Dockerfile
           docker buildx build \
           --cache-to=type=registry,ref=$IMAGE:build-cache,mode=max \
           --cache-from=type=registry,ref=$IMAGE:build-cache \
-          -f Dockerfile \
+          -f app/Dockerfile \
           --platform linux/arm64 \
           -t $IMAGE:$TAG_LATEST \
           --push \
@@ -91,7 +91,7 @@ jobs:
       - name: Stop & Remove existing container (by name)
         run: |
           set -e
-          NAME="yagubogu-backend"
+          NAME="yagubogu-backend-dev"
           if [ "$(docker ps -q -f name=^/${NAME}$)" ]; then
             echo "실행중 컨테이너 중지: $NAME"
             docker stop $NAME
@@ -100,26 +100,33 @@ jobs:
             echo "기존 컨테이너 제거: $NAME"
             docker rm $NAME
           fi
-          echo "포트 80 점유 프로세스 확인 및 정리"
-          sudo fuser -k -n tcp 80 || true
+          echo "포트 8080 점유 프로세스 확인 및 정리"
+          sudo fuser -k -n tcp 8080 || true
 
       - name: Run docker container
         run: |
           set -e
-          NAME="yagubogu-backend"
+          NAME="yagubogu-backend-dev"
           echo "새 Docker 컨테이너 실행..."
           docker run -d \
             --name $NAME \
             --restart unless-stopped \
             --network yagubogu-net \
-            -p 80:8080 \
+            -p 8080:8080 \
             -e SPRING_PROFILES_ACTIVE=dev \
             -e DB_URL="${{ secrets.DB_URL }}" \
             -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+            -e APPLE_CLIENT_ID="${{ secrets.APPLE_CLIENT_ID }}" \
             -e ACCESS_TOKEN_SECRET_KEY="${{ secrets.ACCESS_TOKEN_SECRET_KEY_DEV }}" \
             -e REFRESH_TOKEN_SECRET_KEY="${{ secrets.REFRESH_TOKEN_SECRET_KEY }}" \
+            -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -e OCI_S3_ENDPOINT="${{ secrets.OCI_S3_ENDPOINT }}" \
+            -e OCI_REGION="${{ secrets.OCI_REGION }}" \
+            -e OCI_S3_BUCKET="${{ secrets.OCI_S3_BUCKET }}" \
+            -e DEFAULT_PROFILE_IMAGE_URL="${{ secrets.DEFAULT_PROFILE_IMAGE_URL }}" \
             $IMAGE:$TAG
           
           echo "컨테이너 실행 완료."  

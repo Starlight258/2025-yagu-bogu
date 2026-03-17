@@ -48,6 +48,10 @@ oauth:
     client-id: ${GOOGLE_CLIENT_ID}
     connect-timeout: 180s
     read-timeout: 180s
+  apple:
+    issuer: 'https://appleid.apple.com'
+    jwks-uri: 'https://appleid.apple.com/auth/keys'
+    client-id: ${APPLE_CLIENT_ID}
 
 security:
   token:
@@ -72,10 +76,11 @@ sse:
 
 app:
   s3:
-    bucket: yagubogu
+    bucket: ${OCI_S3_BUCKET}
     presign-expiration: 5m
-  clock:
-    fixed-date: 2024-08-15
+    endpoint: ${OCI_S3_ENDPOINT}
+    region: ${OCI_REGION}
+    default-profile-image-url: ${DEFAULT_PROFILE_IMAGE_URL}
 
 ---
 spring:

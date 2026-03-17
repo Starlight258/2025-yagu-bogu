@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.yagubogu.R
-import com.yagubogu.presentation.util.DateFormatter
 import com.yagubogu.ui.common.model.MEMBER_PROFILE_FIXTURE
 import com.yagubogu.ui.common.model.MemberProfile
 import com.yagubogu.ui.theme.Gray050
@@ -46,6 +45,8 @@ import com.yagubogu.ui.theme.PretendardSemiBold20
 import com.yagubogu.ui.theme.Primary600
 import com.yagubogu.ui.theme.Primary700
 import com.yagubogu.ui.util.noRippleClickable
+import com.yagubogu.ui.util.yyyyMMddFormatter
+import kotlinx.datetime.format
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -342,7 +343,7 @@ private fun DatesRow(
     ) {
         StatItem(
             title = stringResource(R.string.profile_register_date),
-            value = memberProfile.enterDate.format(DateFormatter.yyyyMMdd),
+            value = memberProfile.enterDate.format(yyyyMMddFormatter),
             modifier = Modifier.weight(1f),
         )
         VerticalDivider(
@@ -353,8 +354,7 @@ private fun DatesRow(
         StatItem(
             title = stringResource(R.string.profile_latest_check_in_date),
             value =
-                memberProfile.recentCheckInDate
-                    ?.format(DateFormatter.yyyyMMdd),
+                memberProfile.recentCheckInDate?.format(yyyyMMddFormatter),
             modifier = Modifier.weight(1f),
         )
     }

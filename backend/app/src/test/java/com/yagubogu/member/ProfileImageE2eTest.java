@@ -16,7 +16,6 @@ import com.yagubogu.support.member.MemberBuilder;
 import com.yagubogu.support.member.MemberFactory;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.net.URL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,14 +26,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.S3Utilities;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.doReturn;
 
-@Import({AuthTestConfig.class, JpaAuditingConfig.class})
+@Import({ AuthTestConfig.class, JpaAuditingConfig.class })
 public class ProfileImageE2eTest extends E2eTestBase {
 
     @LocalServerPort
@@ -73,7 +71,7 @@ public class ProfileImageE2eTest extends E2eTestBase {
 
     @DisplayName("pre-signed url을 발급한다")
     @Test
-    void start_success() throws Exception {
+    void start_success() {
         // given
         Member member = memberFactory.save(MemberBuilder::build);
         String accessToken = authFactory.getAccessTokenByMemberId(member.getId(), Role.USER);
@@ -91,10 +89,9 @@ public class ProfileImageE2eTest extends E2eTestBase {
                 .as(PresignedUrlStartResponse.class);
 
         // then
-        URL url = new URL(response.url());
         assertSoftly(softAssertions -> {
-            softAssertions.assertThat(response.key()).startsWith("yagubogu/images/profiles/");
-            softAssertions.assertThat(url.getHost()).contains(s3Properties.bucket());
+            softAssertions.assertThat(response.key()).startsWith("images/profiles/");
+            softAssertions.assertThat(response.url()).contains(s3Properties.bucket());
             softAssertions.assertThat(response.url()).contains(response.key());
         });
     }
@@ -105,10 +102,9 @@ public class ProfileImageE2eTest extends E2eTestBase {
         // given
         Member member = memberFactory.save(MemberBuilder::build);
         String accessToken = authFactory.getAccessTokenByMemberId(member.getId(), Role.USER);
-        String key = "yagubogu/images/profiles/abc-123";
+        String key = "images/profiles/abc-123";
 
-        S3Utilities utilities = s3Client.utilities();
-        String expectedUrl = utilities.getUrl(b -> b.bucket(s3Properties.bucket()).key(key)).toExternalForm();
+        String expectedUrl = s3Properties.endpoint() + "/" + s3Properties.bucket() + "/" + key;
 
         // when
         PreSignedUrlCompleteResponse response = RestAssured.given().log().all()
