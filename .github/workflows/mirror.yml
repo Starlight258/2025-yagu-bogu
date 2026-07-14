@@ -33,6 +33,9 @@ jobs:
           git fetch origin '+refs/heads/*:refs/remotes/origin/*'
           git fetch origin --tags
 
+          # origin/HEAD 포인터 제거 (미러에 'HEAD'라는 가짜 브랜치가 생기는 것 방지)
+          git remote set-head origin --delete || true
+
           # 미러 레포를 리모트로 추가 (토큰 포함 URL)
           git remote add mirror "https://x-access-token:${MIRROR_TOKEN}@github.com/Starlight258/yagubogu-mirror.git"
 
