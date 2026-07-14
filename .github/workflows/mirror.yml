@@ -22,13 +22,6 @@ jobs:
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
         run: |
           set -e
-          # 혹시 남아있을 수 있는 봇 자격증명 헤더 제거 (있으면 지우고, 없으면 무시)
-          git config --unset-all http.https://github.com/.extraheader || true
-
-          # 토큰이 어느 유저로 인식되는지 확인 (여기가 Starlight258이 나와야 정상)
-          echo "== 토큰 유저 확인 =="
-          curl -s -H "Authorization: token ${MIRROR_TOKEN}" https://api.github.com/user | grep '"login"' || true
-
           # origin의 모든 원격 브랜치를 가져온다 (체크아웃된 브랜치는 건드리지 않음)
           git fetch origin '+refs/heads/*:refs/remotes/origin/*'
           git fetch origin --tags
