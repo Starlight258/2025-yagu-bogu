@@ -14,25 +14,28 @@ jobs:
       - name: Checkout (full history, all branches)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # 전체 히스토리 (얕은 클론 방지)
+          fetch-depth: 0            # 전체 히스토리 (얕은 클론 방지)
+          persist-credentials: false  # checkout이 봇 토큰을 git 설정에 심지 않도록
 
       - name: Mirror push to personal repo
         env:
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
         run: |
           set -e
+          # 혹시 남아있을 수 있는 봇 자격증명 헤더 제거 (있으면 지우고, 없으면 무시)
+          git config --unset-all http.https://github.com/.extraheader || true
+
+          # 토큰이 어느 유저로 인식되는지 확인 (여기가 Starlight258이 나와야 정상)
+          echo "== 토큰 유저 확인 =="
+          curl -s -H "Authorization: token ${MIRROR_TOKEN}" https://api.github.com/user | grep '"login"' || true
+
           # origin의 모든 원격 브랜치를 가져온다 (체크아웃된 브랜치는 건드리지 않음)
           git fetch origin '+refs/heads/*:refs/remotes/origin/*'
           git fetch origin --tags
 
-          # 미러 레포를 리모트로 추가 (토큰 없이 순수 URL)
-          git remote add mirror "https://github.com/Starlight258/yagubogu-mirror.git"
-
-          # 토큰을 URL이 아니라 http.extraheader로 주입 (checkout이 심은 봇 자격증명 무시)
-          AUTH=$(printf "x-access-token:%s" "${MIRROR_TOKEN}" | base64 -w0)
+          # 미러 레포를 리모트로 추가 (토큰 포함 URL)
+          git remote add mirror "https://x-access-token:${MIRROR_TOKEN}@github.com/Starlight258/yagubogu-mirror.git"
 
           # origin의 모든 브랜치를 미러 레포의 같은 이름 브랜치로 push
-          git -c http.extraheader="Authorization: Basic ${AUTH}" \
-            push --force mirror 'refs/remotes/origin/*:refs/heads/*'
-          git -c http.extraheader="Authorization: Basic ${AUTH}" \
-            push --force --tags mirror
+          git push --force mirror 'refs/remotes/origin/*:refs/heads/*'
+          git push --force --tags mirror
