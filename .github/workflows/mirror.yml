@@ -26,11 +26,12 @@ jobs:
           cd work
           git remote add upstream "$UPSTREAM"
 
-          # 팀 원본에서 hardening + topic/* 브랜치만 가져온다
+          # 팀 원본에서 hardening + topic/* 브랜치만 로컬 브랜치로 가져온다
           git fetch upstream \
-            'refs/heads/hardening:refs/remotes/upstream/hardening' \
-            'refs/heads/topic/*:refs/remotes/upstream/topic/*'
+            'refs/heads/hardening:refs/heads/hardening' \
+            'refs/heads/topic/*:refs/heads/topic/*'
 
-          # 미러 레포로 같은 이름 브랜치로 push (--force로 항상 최신 상태 유지)
+          # 미러 레포로 로컬 브랜치를 그대로 push (--force로 항상 최신 상태 유지)
           git remote add mirror "$MIRROR"
-          git push --force mirror 'refs/remotes/upstream/*:refs/heads/*'
+          git push --force mirror 'refs/heads/hardening:refs/heads/hardening'
+          git push --force mirror 'refs/heads/topic/*:refs/heads/topic/*'
