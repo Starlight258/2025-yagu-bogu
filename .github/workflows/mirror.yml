@@ -4,8 +4,8 @@ name: Mirror to personal repo
 # 개인 미러 레포로 복제해서 잔디를 채운다.
 on:
   schedule:
-    # cron은 UTC 기준. KST 오전 8시 = UTC 전날 23시
-    - cron: '0 23 * * *'
+    # 매시 정각마다 실행 (UTC 기준이지만 매시각이라 시차 무관)
+    - cron: '0 * * * *'
   workflow_dispatch:  # GitHub Actions 탭에서 수동 실행도 가능
 
 jobs:
